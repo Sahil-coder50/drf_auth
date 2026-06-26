@@ -4,7 +4,7 @@ from django.contrib.auth.models import Permission
 class RoleMixin(models.Model):
 
     roles = models.ForeignKey(
-        "Role",
+        "auth_drf.Role",
         verbose_name=("roles"),
         on_delete=models.SET_NULL,
         blank=True, null=True,

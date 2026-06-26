@@ -98,7 +98,7 @@ class TokenService:
             jti=new_jti,
             family_id=token_obj.family_id,
             parent_jti=token_obj.jti,
-            expires_at=timezone.now() + timezone.now(days=30),
+            expires_at=timezone.now() + timezone.timedelta(days=30),
         )
 
         access_token = JWTService.create_access_token(token_obj.user)

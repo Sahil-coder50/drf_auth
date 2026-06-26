@@ -20,7 +20,7 @@ class AuthViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         user = AuthService.register(
-            serializer.validated_data
+            data=serializer.validated_data
         )
 
         return Response(
@@ -42,7 +42,7 @@ class AuthViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         data = AuthService.login(
-            serializer.validated_data
+            data=serializer.validated_data
         )
 
         user = data.pop("user")
