@@ -123,16 +123,18 @@ Authorization: Bearer <access_token>
 
 # API Endpoints
 
-| Method | Endpoint               |
-| ------ | ---------------------- |
-| POST   | `/auth/register/`      |
-| POST   | `/auth/login/`         |
-| POST   | `/auth/logout/`        |
-| POST   | `/auth/token_refresh/` |
-| POST   | `/roles/`              |
-| PATCH  | `/roles/<id>/`         |
-| GET    | `/roles/`              |
-| GET    | `/roles/<id>/`         |
+| Method | Endpoint                 |
+| ------ | ------------------------ |
+| POST   | `/auth/register/`        |
+| POST   | `/auth/login/`           |
+| GET    | `/auth/google/login/`    |
+| GET    | `/auth/google/callback/` |
+| POST   | `/auth/logout/`          |
+| POST   | `/auth/token_refresh/`   |
+| POST   | `/roles/`                |
+| PATCH  | `/roles/<id>/`           |
+| GET    | `/roles/`                |
+| GET    | `/roles/<id>/`           |
 
 ---
 
@@ -211,6 +213,63 @@ POST /auth/login/
     "refresh": "<refresh_token>"
 }
 ```
+
+---
+
+## Google Login User
+
+### Endpoint
+
+```http
+GET /auth/google/login/
+```
+
+### Response
+
+```json
+{
+    "url": "<google_redirect_url>"
+}
+```
+
+---
+
+---
+
+## Google Login User Callback
+
+Callback API is called automatically by Google OAuth.
+
+### Endpoint
+
+```http
+GET /auth/google/callback?
+```
+
+### Response
+
+```json
+{
+    "id": 1,
+    "email": "vinnie@yopmail.com",
+    "username": "vinnie",
+    "permissions": [
+        {
+            "module": "customer",
+            "actions": [
+                "add_customer",
+                "change_customer",
+                "delete_customer",
+                "view_customer"
+            ]
+        }
+    ],
+    "access": "<access_token>",
+    "refresh": "<refresh_token>"
+}
+```
+
+---
 
 ---
 
