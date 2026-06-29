@@ -100,20 +100,20 @@ class AuthService:
             settings.GOOGLE_CLIENT_ID,
         )
 
-        social = SocialAccount.objects.filter(
-            provider=Providers.GOOGLE,
-            provider_id=info.get("sub"),
-            user=user
+        user = User.objects.filter(
+            social_accounts__provider=Providers.GOOGLE,
+            social_accounts__provider_user_id=info.get("sub"),
+            email=info.get("email"),
         )
-        if social.exists():
-            social = social.first()
+        if user.exists():
+            user = user.first()
 
             user_data = {
-                "id": social.user.id,
-                "email": social.user.email,
-                "username": social.user.username,
-                "role": social.user.roles,
-                "user": social.user,
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "role": user.roles,
+                "user": user,
             }
 
             token = TokenService.issue_token_pair(user)
@@ -122,18 +122,55 @@ class AuthService:
 
             return user_data
         else:
-            User.objects.create(
+            user = User.objects.create(
                 email=info.get("email"),
-                username=info.get("username"),
+                username=info.get("username", info.get("email")),
                 email_or_username=info.get("email"),
                 first_name=info.get("given_name"),
                 last_name=info.get("family_name"),
             )
-            SocialAccount.objects.create(
+            social = SocialAccount.objects.create(
                 provider=Providers.GOOGLE,
-                provider_id=info.get("sub"),
+                provider_user_id=info.get("sub"),
                 user=user
             )
+
+            user.admin=user
+            user.save()
+
+            permissions = PermissionService.list_all()
+            permissions_instances = PermissionService.list_all_instances()
+
+            data = {
+                "name": "Administrator",
+                "permissions": permissions
+            }
+
+            role = RoleService.create(
+                data=data,
+                user=user
+            )
+            user.roles=role
+            user.user_permissions.set(permissions_instances)
+
+            user.save()
+
+            user_data = {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "role": user.roles,
+                "user": user,
+            }
+
+            token = TokenService.issue_token_pair(user)
+
+            user_data.update(token)
+
+            return user_data
+
+
+
 
 
 

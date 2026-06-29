@@ -13,7 +13,7 @@ class BaseUser(AbstractBaseUser, RoleMixin):
     last_name = models.CharField(max_length=150, blank=True)
     email = models.EmailField(blank=True)
     username = models.CharField(max_length=150, unique=True, blank=True)
-    email_or_username = models.CharField(max_length=150, blank=True)
+    email_or_username = models.CharField(max_length=150, unique=True, blank=True)
     is_staff = models.BooleanField(
         default=False,
         help_text=("Designates whether the user can log into this admin site."),

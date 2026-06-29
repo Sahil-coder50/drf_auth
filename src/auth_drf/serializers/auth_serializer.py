@@ -32,7 +32,7 @@ class LoginSerializer(serializers.Serializer):
 
         mutable_data["email_or_username"] = email if email else username
 
-        return self.to_internal_value(mutable_data)
+        return super().to_internal_value(mutable_data)
 
     def get_permissions(self, obj):
         user = self.context.get("user")
@@ -78,7 +78,7 @@ class RegisterSerializer(serializers.Serializer):
 
         mutable_data["email_or_username"] = email if email else username
 
-        return self.to_internal_value(mutable_data)
+        return super().to_internal_value(mutable_data)
 
     def validate_email(self, attr):
         if User.objects.filter(

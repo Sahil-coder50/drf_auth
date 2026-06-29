@@ -3,7 +3,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..serializers.auth_serializer import LoginSerializer, RegisterSerializer
+from django.conf import settings
+
+from urllib.parse import urlencode
+
+from ..serializers.auth_serializer import LoginSerializer, RegisterSerializer, GoogleSerializer
 from ..services.auth_service import AuthService
 from ..services.token_service import TokenService
 from ..services.jwt_service import JWTService
@@ -87,7 +91,45 @@ class AuthViewSet(GenericViewSet):
             data,
             status=status.HTTP_200_OK
         )
-
-    @action(detail=False, methods=["POST"])
+    
+    @action(detail=False, methods=["GET"], url_path="google/login", url_name="google-login")
     def google(self, request):
-        ...
+        params = {
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "response_type": "code",
+            "scope": "openid email profile",
+            "access_type": "offline",
+            "prompt": "consent",
+        }
+
+        url = (
+            "https://accounts.google.com/o/oauth2/v2/auth?"
+            + urlencode(params)
+        )
+
+        return Response({"url": url}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["GET"], url_path="google/callback", url_name="google-callback")
+    def callback(self, request):
+        serializer = GoogleSerializer(
+            data=request.query_params
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        data = AuthService.google_login(
+            code=serializer.validated_data["code"]
+        )
+
+        user = data.pop("user")
+
+        serializer = LoginSerializer(
+            data,
+            context={"user": user}
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
