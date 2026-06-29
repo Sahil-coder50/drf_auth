@@ -17,6 +17,8 @@ authors = [
 dependencies = [
     "djangorestframework>=3.17.1",
     "djangorestframework-simplejwt>=5.5.1",
+    "google-auth>=2.55.1",
+    "requests>=2.34.2",
 ]
 
 [tool.setuptools]

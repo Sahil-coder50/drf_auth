@@ -13,6 +13,7 @@ class BaseUser(AbstractBaseUser, RoleMixin):
     last_name = models.CharField(max_length=150, blank=True)
     email = models.EmailField(blank=True)
     username = models.CharField(max_length=150, unique=True, blank=True)
+    email_or_username = models.CharField(max_length=150, blank=True)
     is_staff = models.BooleanField(
         default=False,
         help_text=("Designates whether the user can log into this admin site."),
@@ -37,17 +38,13 @@ class BaseUser(AbstractBaseUser, RoleMixin):
     objects = BaseUserManager()
 
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "username"
+    USERNAME_FIELD = "email_or_username"
     REQUIRED_FIELDS = ["email"]
 
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
         abstract = True
-
-    def clean(self):
-        super().clean()
-        self.email = self.__class__.objects.normalize_email(self.email)
 
     def get_full_name(self):
         """

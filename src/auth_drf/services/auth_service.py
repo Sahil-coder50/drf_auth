@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.conf import settings
 
 from rest_framework.exceptions import ValidationError
 
@@ -8,6 +9,11 @@ from ..services.token_service import TokenService
 from ..services.role_service import RoleService
 from ..services.permissions_service import PermissionService
 from ..models.role_model import Role
+from ..models.oauth_model import SocialAccount, Providers
+
+import requests
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 User = get_user_model()
 
@@ -47,7 +53,7 @@ class AuthService:
     @classmethod
     def login(cls, *, data):
         user = authenticate(
-            username=data["username"],
+            email_or_username=data["email_or_username"],
             password=data["password"]
         )
 
@@ -67,3 +73,67 @@ class AuthService:
         user_data.update(token)
 
         return user_data
+    
+    @classmethod
+    def google_login(cls, *, code):
+        TOKEN_URL = "https://oauth2.googleapis.com/token"
+
+        response = requests.post(
+            TOKEN_URL,
+            data={
+                "client_id": settings.GOOGLE_CLIENT_ID,
+                "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                "code": code,
+                "grant_type": "authorization_code",
+                "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            },
+            timeout=10,
+        )
+
+        response.raise_for_status()
+
+        tokens = response.json()
+
+        info = id_token.verify_oauth2_token(
+            tokens["id_token"],
+            google_requests.Request(),
+            settings.GOOGLE_CLIENT_ID,
+        )
+
+        social = SocialAccount.objects.filter(
+            provider=Providers.GOOGLE,
+            provider_id=info.get("sub"),
+            user=user
+        )
+        if social.exists():
+            social = social.first()
+
+            user_data = {
+                "id": social.user.id,
+                "email": social.user.email,
+                "username": social.user.username,
+                "role": social.user.roles,
+                "user": social.user,
+            }
+
+            token = TokenService.issue_token_pair(user)
+
+            user_data.update(token)
+
+            return user_data
+        else:
+            User.objects.create(
+                email=info.get("email"),
+                username=info.get("username"),
+                email_or_username=info.get("email"),
+                first_name=info.get("given_name"),
+                last_name=info.get("family_name"),
+            )
+            SocialAccount.objects.create(
+                provider=Providers.GOOGLE,
+                provider_id=info.get("sub"),
+                user=user
+            )
+
+
+

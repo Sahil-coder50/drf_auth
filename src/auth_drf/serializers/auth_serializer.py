@@ -8,14 +8,31 @@ User = get_user_model()
 
 class LoginSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    email = serializers.EmailField()
-    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(max_length=150, required=False)
+    email_or_username = serializers.CharField(max_length=255, required=False)
     password = serializers.CharField(write_only=True)
     roles = RoleMiniSerializer(read_only=True)
     permissions = serializers.SerializerMethodField(read_only=True)
 
     access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)
+
+    def to_internal_value(self, data):
+        email = data.get("email")
+        username = data.get("username")
+        if not email and not username:
+            raise serializers.ValidationError(
+                {
+                    "non_field_errors": "Either email or username must be provided."
+                }
+            )
+        
+        mutable_data = data.copy()
+
+        mutable_data["email_or_username"] = email if email else username
+
+        return self.to_internal_value(mutable_data)
 
     def get_permissions(self, obj):
         user = self.context.get("user")
@@ -42,9 +59,26 @@ class LoginSerializer(serializers.Serializer):
 class RegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
-    email = serializers.EmailField()
-    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(max_length=150, required=False)
+    email_or_username = serializers.CharField(max_length=255, required=False)
     password = serializers.CharField(max_length=128)
+
+    def to_internal_value(self, data):
+        email = data.get("email")
+        username = data.get("username")
+        if not email and not username:
+            raise serializers.ValidationError(
+                {
+                    "non_field_errors": "Either email or username must be provided."
+                }
+            )
+        
+        mutable_data = data.copy()
+
+        mutable_data["email_or_username"] = email if email else username
+
+        return self.to_internal_value(mutable_data)
 
     def validate_email(self, attr):
         if User.objects.filter(
@@ -65,3 +99,7 @@ class RegisterSerializer(serializers.Serializer):
             )
         
         return attr
+    
+
+class GoogleSerializer(serializers.Serializer):
+    code = serializers.CharField()

@@ -87,3 +87,7 @@ class AuthViewSet(GenericViewSet):
             data,
             status=status.HTTP_200_OK
         )
+
+    @action(detail=False, methods=["POST"])
+    def google(self, request):
+        ...
