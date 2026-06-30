@@ -101,11 +101,13 @@ class AuthService:
         )
 
         user = User.objects.filter(
-            social_accounts__provider=Providers.GOOGLE,
-            social_accounts__provider_user_id=info.get("sub"),
             email=info.get("email"),
         )
-        if user.exists():
+        if user.exists() and SocialAccount.objects.filter(
+            user_id=user.first().id,
+            provider=Providers.GOOGLE,
+            provider_user_id=info.get("sub")
+        ):
             user = user.first()
 
             user_data = {
@@ -132,7 +134,7 @@ class AuthService:
             social = SocialAccount.objects.create(
                 provider=Providers.GOOGLE,
                 provider_user_id=info.get("sub"),
-                user=user
+                user_id=user.id
             )
 
             user.admin=user

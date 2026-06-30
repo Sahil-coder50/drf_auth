@@ -5,7 +5,11 @@ from django.utils import timezone
 from ..models.token_model import TokenRefresh
 from ..services.jwt_service import JWTService
 
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class TokenService:
 
@@ -23,7 +27,7 @@ class TokenService:
         )
 
         TokenRefresh.objects.create(
-            user=user,
+            user_id=user.id,
             jti=jti,
             family_id=family_id,
             expires_at=timezone.now() + timezone.timedelta(days=30),
@@ -74,6 +78,12 @@ class TokenService:
         token_obj = TokenRefresh.objects.get(
             jti=refresh_payload["jti"]
         )
+        try:
+            user = User.objects.get(id=token_obj.user_id)
+        except User.DoesNotExist():
+            raise ValidationError(
+                "User with this given query does not exist."
+            )
 
         if token_obj.is_revoked:
             raise AuthenticationFailed(
@@ -94,17 +104,17 @@ class TokenService:
         new_jti = uuid.uuid4()
 
         TokenRefresh.objects.create(
-            user=token_obj.user,
+            user_id=user.id,
             jti=new_jti,
             family_id=token_obj.family_id,
             parent_jti=token_obj.jti,
             expires_at=timezone.now() + timezone.timedelta(days=30),
         )
 
-        access_token = JWTService.create_access_token(token_obj.user)
+        access_token = JWTService.create_access_token(user)
 
         refresh_token = JWTService.create_refresh_token(
-            user=token_obj.user,
+            user=user,
             jti=new_jti,
             family_id=token_obj.family_id,
             parent_jti=token_obj.jti,

@@ -13,12 +13,8 @@ class Role(models.Model):
         help_text="Role Based Permissions",
     )
 
-    admin = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="users",
-    )
+    admin_id = models.IntegerField(blank=False, null=False)
 
     class Meta:
-        unique_together = ("name", "admin")
+        unique_together = ("name", "admin_id")
 

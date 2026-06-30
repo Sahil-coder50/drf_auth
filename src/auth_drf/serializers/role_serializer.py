@@ -9,7 +9,7 @@ class RoleCreateSerializer(serializers.ModelSerializer):
         model = Role
         exclude = [
             "id",
-            "admin"
+            "admin_id"
         ]
 
     def validate_name(self, attr):
@@ -17,7 +17,7 @@ class RoleCreateSerializer(serializers.ModelSerializer):
 
         if Role.objects.filter(
             name=attr,
-            admin=request.user.admin,
+            admin_id=request.user.admin.id,
         ).exists():
             raise serializers.ValidationError(
                 "Role with this name already exist."
@@ -32,7 +32,7 @@ class RoleUpdateSerializer(serializers.ModelSerializer):
         model = Role
         exclude = [
             "id",
-            "admin"
+            "admin_id"
         ]
 
 class RoleListSerializer(serializers.ModelSerializer):
@@ -105,5 +105,5 @@ class RoleMiniSerializer(serializers.ModelSerializer):
         model = Role
         exclude = [
             "permissions",
-            "admin",
+            "admin_id",
         ]

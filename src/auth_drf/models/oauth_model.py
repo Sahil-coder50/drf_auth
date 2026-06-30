@@ -1,18 +1,13 @@
 from django.db import models
 
-from django.contrib.auth import get_user_model
-User = get_user_model()
+from django.conf import settings
 
 class Providers(models.TextChoices):
     GOOGLE = ("Google", "google")
     GITHUB = ("Github", "github")
 
 class SocialAccount(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="social_accounts",
-    )
+    user_id = models.IntegerField(blank=False, null=False)
 
     provider = models.CharField(
         max_length=20,

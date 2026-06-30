@@ -21,7 +21,7 @@ class RoleService:
         
         role = Role.objects.create(
             **data,
-            admin=user.admin
+            admin_id=user.admin.id
         )
 
         role.permissions.set(permission_instance)
@@ -60,7 +60,7 @@ class RoleService:
     def list(user):
         
         roles = Role.objects.filter(
-            admin=user.admin if user.admin else user
+            admin_id=user.admin.id if user.admin else user.id
         ).prefetch_related("permissions")
 
         return roles

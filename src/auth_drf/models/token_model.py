@@ -11,11 +11,7 @@ class TokenRefresh(models.Model):
         editable=False,
     )
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="refresh_tokens",
-    )
+    user_id = models.IntegerField(null=False, blank=False)
 
     jti = models.UUIDField(
         unique=True,
@@ -62,6 +58,6 @@ class TokenRefresh(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["family_id"]),
-            models.Index(fields=["user"]),
+            models.Index(fields=["user_id"]),
             models.Index(fields=["expires_at"]),
         ]
