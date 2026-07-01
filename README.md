@@ -52,7 +52,17 @@ INSTALLED_APPS = [
 
 ---
 
-## Step 2: Create a Custom User Model
+## Step 2: Add the Google Client, Secret, and Redirect uri
+
+```python
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET")
+GOOGLE_REDIRECT_URI = env("GOOGLE_REDIRECT_URI")
+```
+
+---
+
+## Step 3: Create a Custom User Model
 
 ```python
 from auth_drf.models.user_model import BaseUser
@@ -68,7 +78,7 @@ class Customer(BaseUser):
 
 ---
 
-## Step 3: Configure `AUTH_USER_MODEL`
+## Step 4: Configure `AUTH_USER_MODEL`
 
 ```python
 AUTH_USER_MODEL = "user_test.Customer"
@@ -76,7 +86,7 @@ AUTH_USER_MODEL = "user_test.Customer"
 
 ---
 
-## Step 4: Configure DRF Authentication
+## Step 5: Configure DRF Authentication
 
 ```python
 REST_FRAMEWORK = {
@@ -88,7 +98,7 @@ REST_FRAMEWORK = {
 
 ---
 
-## Step 5: Include Package URLs
+## Step 6: Include Package URLs
 
 ```python
 from django.contrib import admin
@@ -102,7 +112,7 @@ urlpatterns = [
 
 ---
 
-## Step 6: Run Migrations
+## Step 7: Run Migrations
 
 ```bash
 python manage.py makemigrations
