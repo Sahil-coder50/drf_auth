@@ -10,3 +10,6 @@ wheels/
 
 # tests
 config/
+
+__pycache__/
+*.pyc
