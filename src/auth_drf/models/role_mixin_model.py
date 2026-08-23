@@ -45,6 +45,10 @@ def _user_get_permissions(user, from_name):
         permissions.update(user.roles.permissions.all())
     elif from_name == "all":
         permissions.update(user.user_permissions.all())
-        permissions.update(user.roles.permissions.all())
+        if user.roles is not None:# new con
+               permissions.update(user.roles.permissions.all())
     return permissions
+
+
+#Bas if user.roles is not None: check add kiya — pehle roles=None hone par crash ho raha tha, ab safe fallback ho jayega (empty permissions milenge, crash nahi hoga).
 
